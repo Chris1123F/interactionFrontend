@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="configure">
-    <h2>配置 configuration</h2>
+<!--     <h2>配置 configuration</h2>
     <p><input type="checkbox"
               v-model="enablePath"
               @change="renewGesture"
@@ -19,20 +19,20 @@
                                                           @change="renewGesture"><span class="option-tip">triggerMouseKey</span></p>
     <p><span class="config-title">开启手势时背景色</span><input v-model="activeColor"
                                                         type="text"
-                                                        @change="renewGesture"><span class="option-tip">triggerMouseKey</span></p>
+                                                        @change="renewGesture"><span class="option-tip">triggerMouseKey</span></p> -->
 
   </div>
     <div class="recognize">
     <div class="add">
       <h2>手势区域</h2>
-      <label>添加新手势 </label>
+      <label>对应URL</label>
       <input v-model="gestureName" placeholder="手势名称">
-      <button  @click="addGesture">ADD</button>
+      <button  @click="addGesture">添加</button>
     </div>
     <div class="result">
       <h2>识别结果</h2>
-      <p>Gesture result: <span style="font-weight: bold; color: #2b5;">{{this.result}}</span></p>
-      <p>Swipe directions result: <span style="font-weight: bold; color: #2b5;" >{{this.result0}}</span></p>
+      <p>对应URL <span style="font-weight: bold; color: #2b5;">{{this.result}}</span></p>
+      <p>当前手势 <span style="font-weight: bold; color: #2b5;" >{{this.result0}}</span></p>
     </div>
     <div id="test" class="stage">
     </div>
@@ -62,19 +62,19 @@ export default {
     }
   },
   methods: {
-    renewGesture () {
-      const options = {
-        enablePath: this.enablePath,
-        timeDelay: this.timeDelay,
-        lineColor: this.lineColor,
-        lineWidth: this.lineWidth,
-        triggerMouseKey: this.triggerMouseKey,
-        activeColor: this.activeColor
-      }
-      // const canvas = new smartGesture(options)
-      this.canvas.refresh(options)
-      console.log('refresh success')
-    },
+    // renewGesture () {
+    //   const options = {
+    //     enablePath: this.enablePath,
+    //     timeDelay: this.timeDelay,
+    //     lineColor: this.lineColor,
+    //     lineWidth: this.lineWidth,
+    //     triggerMouseKey: this.triggerMouseKey,
+    //     activeColor: this.activeColor
+    //   }
+    //   // const canvas = new smartGesture(options)
+    //   this.canvas.refresh(options)
+    //   console.log('refresh success')
+    // },
     addGesture () {
       this.canvas.addGesture({
         name: this.gestureName,
@@ -97,11 +97,19 @@ export default {
         console.log(list)
       },
       onGesture: (res, points) => {
-        console.log(res)
-        this.result= res.score > 2 ? res.name : '未识别';
+        this.result = res.score > 2 ? res.name : '未识别';
+        if (res.score > 2) {
+          if (res.name.indexOf(".") != -1) {
+            console.log(res)
+            window.open("http://" + res.name, '_blank')
+          } else {
+            window.open(res.name, '_blank')
+          }
+        }
         this.lastPoints = points
       }
     }
+    console.log("start");
     this.canvas = new smartGesture(options)
   }
 }
