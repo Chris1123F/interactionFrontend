@@ -3,40 +3,36 @@
     <div class="configure">
     <h2>配置 configuration</h2>
     <p><input type="checkbox"
-              id="path"
-              onchange="renewGesture()"
-              checked><label for="path">开启鼠标轨迹</label><span class="option-tip">enablePath</span></p>
-    <p><span class="config-title">触发手势识别时间(ms)</span><input id="delay"
+              v-model="enablePath"
+              @change="renewGesture"
+              checked><label >开启鼠标轨迹</label><span class="option-tip">enablePath</span></p>
+    <p><span class="config-title">触发手势识别时间(ms)</span><input v-model="timeDelay"
                                                             type="number"
-                                                            value="0"
-                                                            onchange="renewGesture()"><span class="option-tip">timeDelay</span></p>
-    <p><span class="config-title">鼠标轨迹颜色</span><input id="color"
+                                                            @change="renewGesture"><span class="option-tip">timeDelay</span></p>
+    <p><span class="config-title">鼠标轨迹颜色</span><input v-model="lineColor"
                                                       type="text"
-                                                      value="#666"
-                                                      onchange="renewGesture()"><span class="option-tip">lineColor</span></p>
-    <p><span class="config-title">鼠标轨迹宽度</span><input id="width" type="text" value="4" onchange="renewGesture()"><span
+                                                      @change="renewGesture"><span class="option-tip">lineColor</span></p>
+    <p><span class="config-title">鼠标轨迹宽度</span><input v-model="lineWidth" type="text"  @change="renewGesture"><span
       class="option-tip">lineWidth</span></p>
-    <p><span class="config-title">触发手势识别鼠标按键</span><input id="key"
+    <p><span class="config-title">触发手势识别鼠标按键</span><input v-model="triggerMouseKey"
                                                           type="text"
-                                                          value="left"
-                                                          onchange="renewGesture()"><span class="option-tip">triggerMouseKey</span></p>
-    <p><span class="config-title">开启手势时背景色</span><input id="active-color"
+                                                          @change="renewGesture"><span class="option-tip">triggerMouseKey</span></p>
+    <p><span class="config-title">开启手势时背景色</span><input v-model="activeColor"
                                                         type="text"
-                                                        value="rgba(0, 0, 0, .05)"
-                                                        onchange="renewGesture()"><span class="option-tip">triggerMouseKey</span></p>
+                                                        @change="renewGesture"><span class="option-tip">triggerMouseKey</span></p>
 
   </div>
     <div class="recognize">
     <div class="add">
       <h2>手势区域</h2>
       <label>添加新手势 </label>
-      <input id="gestureName" placeholder="手势名称">
-      <button id="btn" onclick="addGesture()">ADD</button>
+      <input v-model="gestureName" placeholder="手势名称">
+      <button  @click="addGesture">ADD</button>
     </div>
     <div class="result">
       <h2>识别结果</h2>
-      <p>Gesture result: <span style="font-weight: bold; color: #2b5;" id="result"></span></p>
-      <p>Swipe directions result: <span style="font-weight: bold; color: #2b5;" id="result0"></span></p>
+      <p>Gesture result: <span style="font-weight: bold; color: #2b5;">{{this.result}}</span></p>
+      <p>Swipe directions result: <span style="font-weight: bold; color: #2b5;" >{{this.result0}}</span></p>
     </div>
     <div id="test" class="stage">
     </div>
@@ -45,65 +41,68 @@
 </template>
 
 <script>
-
+import smartGesture from 'smart-gesture'
 export default {
   name: 'HelloWorld',
   components: {
   },
   data () {
     return {
+      canvas: {},
+      result: '未识别',
+      result0: '未识别',
+      gestureName: '',
       lastPoints: [],
-      msg: 'Welcome to Your Vue.js App'
+      enablePath: 'checked',
+      timeDelay: 0,
+      lineColor: '#666',
+      lineWidth: 4,
+      triggerMouseKey: 'left',
+      activeColor: 'rgba(0, 0, 0, .05)',
     }
   },
-  renewGesture () {
-    var options = {
-      enablePath: document.getElementById('path').checked,
-      timeDelay: document.getElementById('delay').value,
-      lineColor: document.getElementById('color').value,
-      lineWidth: document.getElementById('width').value,
-      triggerMouseKey: document.getElementById('key').value,
-      activeColor: document.getElementById('active-color').value,
+  methods: {
+    renewGesture () {
+      const options = {
+        enablePath: this.enablePath,
+        timeDelay: this.timeDelay,
+        lineColor: this.lineColor,
+        lineWidth: this.lineWidth,
+        triggerMouseKey: this.triggerMouseKey,
+        activeColor: this.activeColor
+      }
+      // const canvas = new smartGesture(options)
+      this.canvas.refresh(options)
+      console.log('refresh success')
+    },
+    addGesture () {
+      this.canvas.addGesture({
+        name: this.gestureName,
+        points: this.lastPoints
+      })
+      console.log('add success')
     }
-    var canvas = new SmartGesture(options)
-    canvas.refresh(options)
   },
   mounted () {
-
-
-    var options = {
+    const options = {
       el: document.getElementById('test'),
-      enablePath: document.getElementById('path').checked,
-      timeDelay: document.getElementById('delay').value,
-      lineColor: document.getElementById('color').value,
-      lineWidth: document.getElementById('width').value,
-      triggerMouseKey: document.getElementById('key').value,
-      activeColor: document.getElementById('active-color').value,
+      enablePath: this.enablePath,
+      timeDelay: this.timeDelay,
+      lineColor: this.lineColor,
+      lineWidth: this.lineWidth,
+      triggerMouseKey: this.triggerMouseKey,
+      activeColor: this.activeColor,
       onSwipe: (list) => {
-        document.getElementById('result0').innerHTML = list.join('');
+        this.result0 = list.join('')
         console.log(list)
       },
       onGesture: (res, points) => {
-
-        //此处调用后端接口
-        console.log(res);
-        document.getElementById('result').innerHTML = res.score > 2 ? res.name : '未识别'
-        this.data.lastPoints = points
+        console.log(res)
+        this.result= res.score > 2 ? res.name : '未识别';
+        this.lastPoints = points
       }
     }
-
-    var canvas = new SmartGesture(options)
-
-    document.getElementById('btn').addEventListener('click', () => {
-      canvas.addGesture({
-        name: document.getElementById('gestureName').value,
-        points: lastPoints
-      })
-      document.getElementById('gestureName').value = ''
-    })
-  },
-  addGesture () {
-
+    this.canvas = new smartGesture(options)
   }
 }
 </script>

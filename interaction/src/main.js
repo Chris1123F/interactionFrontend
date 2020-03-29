@@ -1,10 +1,13 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
-import SmartGesture from 'smart-gesture'
+import smartGesture from 'smart-gesture'
+// import 'smart-gesture'
 import App from './App'
 import router from './router'
-Vue.use(SmartGesture)
+
+
+Vue.use(smartGesture)
 
 Vue.config.productionTip = false
 
