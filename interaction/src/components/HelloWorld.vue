@@ -25,14 +25,24 @@
     <div class="recognize">
     <div class="add">
       <h2>手势区域</h2>
-      <label>对应URL</label>
+      <label>手势名称</label>
       <input v-model="gestureName" placeholder="手势名称">
+      <label>对应URL</label>
+      <input v-model="url" placeholder="手势名称">
       <button  @click="addGesture">添加</button>
     </div>
     <div class="result">
       <h2>识别结果</h2>
       <p>对应URL <span style="font-weight: bold; color: #2b5;">{{this.result}}</span></p>
-      <p>当前手势 <span style="font-weight: bold; color: #2b5;" >{{this.result0}}</span></p>
+      <p>当前手势 <span style="font-weight: bold; color: #2b5;" ><img :src="img" id = "img" alt="..." style="height: 100px ;width: 100px"></span></p>
+    </div>
+    <div class="table">
+      <v-table
+        :columns="columns"
+        :table-data="tableData"
+        row-hover-color="#eee"
+        row-click-color="#edf7ff"
+      ></v-table>
     </div>
     <div id="test" class="stage">
     </div>
@@ -41,7 +51,13 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import 'vue-easytable/libs/themes-base/index.css'
 import smartGesture from 'smart-gesture'
+import {VTable} from 'vue-easytable'
+// 注册到全局
+Vue.component(VTable.name, VTable)
+import html2canvas from 'html2canvas';
 export default {
   name: 'HelloWorld',
   components: {
@@ -59,6 +75,17 @@ export default {
       lineWidth: 4,
       triggerMouseKey: 'left',
       activeColor: 'rgba(0, 0, 0, .05)',
+      img:"",
+      url:'',
+      maps:new Map(),
+      tableData:[],
+      columns:[
+        {field: 'name', title:'手势名', width: 80, titleAlign: 'center',columnAlign:'center',isResize:true},
+        {field: 'url', title:'url', width: 80, titleAlign: 'center',columnAlign:'center',isResize:true},
+        {field: 'src', title:'手势', width: 80, titleAlign: 'center',columnAlign:'center',formatter: function (rowData,rowIndex,pagingIndex,field) {
+                                return '<img style="height: 50px ;width: 50px" src= ' + rowData.src + '></img>' 
+                            },isResize:true},
+      ]
     }
   },
   methods: {
@@ -80,6 +107,12 @@ export default {
         name: this.gestureName,
         points: this.lastPoints
       })
+      var gesture = new Object();
+      gesture.name = this.gestureName;
+      gesture.url = this.url;
+      gesture.src = document.getElementById('img').src;
+      this.tableData.push(gesture);
+      this.maps.set(this.gestureName, this.url);
       console.log('add success')
     }
   },
@@ -94,22 +127,33 @@ export default {
       activeColor: this.activeColor,
       onSwipe: (list) => {
         this.result0 = list.join('')
-        console.log(list)
+        //console.log(list)
+        html2canvas(document.getElementById('test'))
+          .then(
+            function(canvas) {
+              var img = document.getElementById('img')
+              img.src =  canvas.toDataURL("image/png");
+
+              // this.img = canvas.toDataURL("image/png");
+            },
+          );
+        //this.img = this.canvas.toDataURL("image/png");
       },
       onGesture: (res, points) => {
         this.result = res.score > 2 ? res.name : '未识别';
         if (res.score > 2) {
-          if (res.name.indexOf(".") != -1) {
-            console.log(res)
-            window.open("http://" + res.name, '_blank')
+          var url = this.maps.get(res.name);
+          if (url.indexOf(".") != -1) {
+            window.open("http://" + url, '_blank')
           } else {
-            window.open(res.name, '_blank')
+            window.open(url, '_blank')
           }
         }
+        //console.log(this.canvas);
         this.lastPoints = points
       }
     }
-    console.log("start");
+    //console.log("start");
     this.canvas = new smartGesture(options)
   }
 }
@@ -130,7 +174,8 @@ export default {
   }
 
   .add,
-  .result {
+  .result,
+  .table {
     display: inline-block;
     vertical-align: top;
   }
@@ -140,7 +185,11 @@ export default {
     padding-left: 100px;
     border-left: 1px dashed #ccc;
   }
-
+  .table {
+    margin-left: 100px;
+    padding-left: 100px;
+    border-left: 1px dashed #ccc;
+  }
   .config-title {
     display: inline-block;
     width: 200px;
@@ -151,12 +200,12 @@ export default {
     font-size: 12px;
     vertical-align: middle;
   }
-
   .stage {
     height: 400px;
+    width: 400px;
     background: #ddd;
     position: relative;
-    margin: 15px 0;
+    margin: auto;
   }
 
   .stage:before {
