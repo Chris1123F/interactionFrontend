@@ -42,6 +42,7 @@
         :table-data="tableData"
         row-hover-color="#eee"
         row-click-color="#edf7ff"
+        footer-row-height="80"
       ></v-table>
     </div>
     <div id="test" class="stage">
@@ -81,7 +82,7 @@ export default {
       tableData:[],
       columns:[
         {field: 'name', title:'手势名', width: 80, titleAlign: 'center',columnAlign:'center',isResize:true},
-        {field: 'url', title:'url', width: 80, titleAlign: 'center',columnAlign:'center',isResize:true},
+        {field: 'url', title:'url', width: 200, titleAlign: 'center',columnAlign:'center',isResize:true},
         {field: 'src', title:'手势', width: 80, titleAlign: 'center',columnAlign:'center',formatter: function (rowData,rowIndex,pagingIndex,field) {
                                 return '<img style="height: 50px ;width: 50px" src= ' + rowData.src + '></img>' 
                             },isResize:true},
